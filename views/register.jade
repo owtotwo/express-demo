@@ -1,0 +1,18 @@
+// register.jade
+extends layout
+block content
+  h1 Register
+  form(method='post', action='/register')
+    div
+      label Username: 
+      input(type='text', name='username', placeholder='Username')
+    div
+      label Password:
+      input(type='password', name='password', placeholder='Password')
+    div
+      label Password Again:
+      input(type='password', name='password again', placeholder='Password Again')
+    div
+      label Age:
+      input(type='text', name='age', placeholder='Age')
+    button(type='submit') Confirm

@@ -1,0 +1,9 @@
+// error.jade
+extends layout
+block content
+  // 错误信息，即变量res.locals.message
+  h1= message
+  // 错误状态，即变量res.locals.error.status
+  h2= error.status
+  // 错误栈，即变量res.locals.error.stack
+  pre #{error.stack}
