@@ -8,8 +8,12 @@ var logger = require('morgan');
 var path = require('path');
 // 引入处理/register路径的路由
 var register = require('./routes/register');
+// 引入处理/login路径的路由
+var login = require('./routes/login');
 // 引入body-parser来解析post请求
 var bodyParser = require('body-parser');
+// 引入cookie-parser来解析判断登录状态的cookie字段
+var cookieParser = require('cookie-parser');
 
 // 创建app
 app = express();
@@ -23,12 +27,43 @@ app.set('view engine', 'jade');
 app.use(logger('dev'));
 // 使用其中的URL-Parser
 app.use(bodyParser.urlencoded({ extended: false }));
+// 使用cookie-parser中间件
+app.use(cookieParser('uims_secret'));
+
+// 为所有请求添加req.isAuthorized参数，通过判断是否携带含alive和username字段的cookie
+app.use((req, res, next) => {
+    if (req.signedCookies.alive && req.signedCookies.alive == req.cookies.username) {
+        req.isAuthorized = true;
+    } else {
+        req.isAuthorized = false;
+    }
+    next();
+});
+
+// 为处理/register路径添加路由
+app.use('/register', register);
+// 为处理/login路径添加路由
+app.use('/login', login);
+
+// 拦截未登录用户，未登录的请求直接重定向至登录页面
+// 注：此中间件后面的路由只有登录后才能访问
+app.use((req, res, next) => {
+    if (!req.isAuthorized)
+        res.redirect('/login');
+    else
+        next();
+});
 
 // 分析根路径的url的get请求，箭头函数请学习ES6，下同
 app.get('/', (req, res, next) => res.send('Hello UIMS!'));
 
-// 为处理/register路径添加路由
-app.use('/register', register);
+// 已登录的用户请求/logout时即为它清除响应的cookies
+app.get('/logout', (req, res) => {
+    res.clearCookie('username');
+    res.clearCookie('alive');
+    // 登出后重定向至登录页面
+    res.redirect('/login');
+});
 
 // 假若上面的中间件（路由等）中没有结束，那就无条件地进入到这个中间件，除错误处理中间件以外，其
 // 他的中间件都是三个参数。

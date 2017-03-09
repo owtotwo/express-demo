@@ -1,0 +1,12 @@
+// login.jade
+extends layout
+block content
+  h1 Login
+  form(method='post', action='/login')
+    div
+      label Username: 
+      input(type='text', name='username', placeholder='Username')
+    div
+      label Password: 
+      input(type='password', name='password', placeholder='Password')
+    button(type='submit') Confirm
